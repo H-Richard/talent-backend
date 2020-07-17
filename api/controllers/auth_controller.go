@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"golang.org/x/crypto/bcrypt"
+	"fmt"
 	"encoding/json"
 	"net/http"
 	"io/ioutil"
@@ -9,7 +11,6 @@ import (
 	"github.com/H-Richard/talent/api/responses"
 	"github.com/H-Richard/talent/api/auth"
 	"github.com/H-Richard/talent/api/utils"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // SignIn signs in the user
@@ -22,6 +23,7 @@ func (server *Server) SignIn(email, password string) (string ,error) {
 	}
 	err = models.VerifyPassword(user.Password, password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		fmt.Println(err)
 		return "", err
 	}
 	return auth.Create(user.ID)
@@ -51,5 +53,10 @@ func (server *Server) Login (w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, utils.FormatError(err.Error()))
 		return
 	}
-	responses.JSON(w, http.StatusOK, token)
+	gottenUser, err := user.FindByEmail(server.DB, user.Email)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, utils.FormatError(err.Error()))
+		return
+	}
+	responses.JSON(w, http.StatusOK, map[string]interface{}{ "token": token, "user": gottenUser.JSON() })
 }
