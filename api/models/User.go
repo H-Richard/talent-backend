@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"errors"
 	"html"
 	"strings"
@@ -14,8 +15,8 @@ import (
 // User model
 type User struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	FirstName string    `gorm:"size:255;not null;" json:"firstname"`
-	LastName  string    `gorm:"size:255;not null;" json:"lastname"`
+	FirstName string    `gorm:"size:255;not null;" json:"firstName"`
+	LastName  string    `gorm:"size:255;not null;" json:"lastName"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
 	Executive bool      `gorm:"default:true" json:"executive"`
@@ -30,6 +31,7 @@ func HashPassword(password string) ([]byte, error) {
 
 // VerifyPassword function for password verification
 func VerifyPassword(hashedPassword, password string) error {
+	fmt.Printf("comparing %s with %s", hashedPassword, password)
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
@@ -38,8 +40,24 @@ func (u *User) Pre() {
 	u.ID = 0
 	u.FirstName = html.EscapeString(strings.TrimSpace(u.FirstName))
 	u.LastName = html.EscapeString(strings.TrimSpace(u.LastName))
-	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
+}
+
+// Post function to hash user password
+func (u *User) Post() error {
+	preHashed := u.Password
+	hashedPassword, err := HashPassword(u.Password)
+	err = VerifyPassword(string(hashedPassword), preHashed)
+	if err == nil {
+		fmt.Println("PASSWORD CORRECT HERE!")
+	} else {
+		fmt.Println("PASSWORD WRONG HOW")
+	}
+	if err != nil {
+		return err
+	}
+	u.Password = string(hashedPassword)
+	return nil
 }
 
 // Helper validation function validates all user fields
@@ -85,6 +103,12 @@ func (u *User) Validate(action string) error {
 // SaveUser function for saving users to the database
 func (u *User) SaveUser(db *gorm.DB) (*User, error) {
 	var err error
+	// fmt.Printf("Prehashed = %s", u.Password)
+	err = u.Post()
+	// fmt.Printf("Posthashed = %s", u.Password)
+	if err != nil {
+		return &User{}, err
+	}
 	err = db.Debug().Create(&u).Error
 	if err != nil {
 		return &User{}, err
@@ -105,6 +129,19 @@ func (u *User) FindByID(db *gorm.DB, uid uint32) (*User, error) {
 	return u, err
 }
 
+// FindByEmail function finds a user by their email
+func (u *User) FindByEmail(db *gorm.DB, email string) (*User, error) {
+	var err error
+	err = db.Debug().Model(User{}).Where("email = ?", email).Take(&u).Error
+	if err != nil {
+		return &User{}, err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		return &User{}, errors.New("User Not Found")
+	}
+	return u, err
+}
+
 // All function finds all non-executive users
 func (u *User) All(db *gorm.DB) (*[]User, error) {
 	var err error
@@ -114,5 +151,16 @@ func (u *User) All(db *gorm.DB) (*[]User, error) {
 		return &[]User{}, err
 	}
 	return &users, err
+}
+
+// JSON function returns json representation if each user.
+func (u *User) JSON() map[string]interface{} {
+	return map[string]interface{} {
+		"email": u.Email,
+		"firstName": u.FirstName,
+		"lastName": u.LastName,
+		"executive": u.Executive,
+		"updatedAt": u.UpdatedAt,
+	}
 }
 

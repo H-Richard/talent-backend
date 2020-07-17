@@ -36,7 +36,7 @@ func Seed(db *gorm.DB) {
 	}
 
 	for i := range users {
-		err = db.Debug().Model(&models.User{}).Create(&users[i]).Error
+		_, err = users[i].SaveUser(db)
 		if err != nil {
 			log.Fatalf("cannot insert to table: %v", err)
 		}
