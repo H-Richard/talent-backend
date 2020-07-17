@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/H-Richard/talent/api/responses"
 	"github.com/H-Richard/talent/api/models"
+	"github.com/H-Richard/talent/api/auth"
 	"github.com/H-Richard/talent/api/utils"
 )
 
@@ -32,11 +33,16 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	createdUser, err := user.SaveUser(server.DB)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, utils.FormatError(err.Error()))
+		responses.ERROR(w, http.StatusConflict, utils.FormatError(err.Error()))
 		return
 	}
 	w.Header().Set("Location", fmt.Sprintf("%s%s/%d", r.Host, r.RequestURI, createdUser.ID))
-	responses.JSON(w, http.StatusCreated, createdUser)
+	token, err := auth.Create(user.ID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, utils.FormatError(err.Error()))
+		return
+	}
+	responses.JSON(w, http.StatusCreated, map[string]interface{}{ "token": token ,"user": createdUser.JSON() })
 }
 
 // GetUser responds with a user if found
