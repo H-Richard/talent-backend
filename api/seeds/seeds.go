@@ -23,9 +23,23 @@ var users = []models.User{
 	},
 }
 
+var posts = []models.Post{
+	models.Post{
+		Title: "Software Developer",
+		Description: "Write Software",
+		Requirements: []string{"Python", "TypeScript"},
+		Desirements: []string{"Flask", "Ember"},
+	},
+	models.Post{
+		Title: "VP of Marketing",
+		Description: "Market Things",
+		Requirements: []string{"Instagram", "Facebook"},
+		Desirements: []string{"Skills", "Youtube"},
+	},
+}
 
-// Seed function seeds the database
-func Seed(db *gorm.DB) {
+// Migrate runs migrations
+func Migrate(db *gorm.DB) {
 	err := db.Debug().DropTableIfExists(&models.User{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v", err)
@@ -34,9 +48,28 @@ func Seed(db *gorm.DB) {
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v", err)
 	}
+	err = db.Debug().DropTableIfExists(&models.Post{}).Error
+	if err != nil {
+		log.Fatalf("cannot drop table: %v", err)
+	}
+	err = db.Debug().AutoMigrate(&models.Post{}).Error
+	if err != nil {
+		log.Fatalf("cannot migrate table: %v", err)
+	}
+}
 
+// Seed function seeds the database
+func Seed(db *gorm.DB) {
+	Migrate(db)
 	for i := range users {
-		_, err = users[i].SaveUser(db)
+		err := db.Model(&models.User{}).Create(&users[i]).Error
+		if err != nil {
+			log.Fatalf("cannot insert to table: %v", err)
+		}
+	}
+	for i := range posts {
+		posts[i].AuthorID = users[0].ID
+		err := db.Model(&models.Post{}).Create(&posts[i]).Error
 		if err != nil {
 			log.Fatalf("cannot insert to table: %v", err)
 		}
