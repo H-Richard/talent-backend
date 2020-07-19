@@ -59,7 +59,7 @@ func (server *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	responses.JSON(w, http.StatusOK, gottenUser)
+	responses.JSON(w, http.StatusOK, gottenUser.JSON())
 }
 
 // GetUsers responds with all users
@@ -69,6 +69,10 @@ func (server *Server) GetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
+	}
+	res := []map[string]interface{}{}
+	for i := range *users {
+		res = append(res, (*users)[i].JSON())
 	}
 	responses.JSON(w, http.StatusOK, users)
 }

@@ -48,11 +48,6 @@ func (u *User) Post() error {
 	preHashed := u.Password
 	hashedPassword, err := HashPassword(u.Password)
 	err = VerifyPassword(string(hashedPassword), preHashed)
-	if err == nil {
-		fmt.Println("PASSWORD CORRECT HERE!")
-	} else {
-		fmt.Println("PASSWORD WRONG HOW")
-	}
 	if err != nil {
 		return err
 	}
