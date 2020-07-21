@@ -62,7 +62,7 @@ func Migrate(db *gorm.DB) {
 func Seed(db *gorm.DB) {
 	Migrate(db)
 	for i := range users {
-		err := db.Model(&models.User{}).Create(&users[i]).Error
+		_, err := users[i].SaveUser(db)
 		if err != nil {
 			log.Fatalf("cannot insert to table: %v", err)
 		}
