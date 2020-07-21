@@ -26,6 +26,7 @@ func (server *Server) SignIn(email, password string) (string ,error) {
 		fmt.Println(err)
 		return "", err
 	}
+	fmt.Printf("%s", models.VerifyPassword(user.Password, password))
 	return auth.Create(user.ID)
 }
 
