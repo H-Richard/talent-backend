@@ -1,18 +1,18 @@
 package controllers
 
 import (
-	"net/http"
 	"encoding/json"
-	"fmt"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strconv"
-	
-	"github.com/gorilla/mux"
-	"github.com/H-Richard/talent/api/responses"
-	"github.com/H-Richard/talent/api/models"
+
 	"github.com/H-Richard/talent/api/auth"
+	"github.com/H-Richard/talent/api/models"
+	"github.com/H-Richard/talent/api/responses"
 	"github.com/H-Richard/talent/api/utils"
+	"github.com/gorilla/mux"
 )
 
 // CreatePost creats posts

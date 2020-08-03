@@ -12,7 +12,7 @@ var (
 )
 
 func (s *Server) initializeRoutes() {
-	// GET /healthz 
+	// GET /healthz
 	s.Router.HandleFunc("/healthz", middleware.SetMiddlewareJSON(s.Health)).Methods(GET)
 
 	// POST /login
@@ -25,4 +25,7 @@ func (s *Server) initializeRoutes() {
 	// Posts routes
 	s.Router.HandleFunc("/posts", middleware.SetMiddlewareJSON(s.GetActivePosts)).Methods(GET)
 	s.Router.HandleFunc("/posts", middleware.SetMiddlewareJSON(s.CreatePost)).Methods(POST)
+
+	// Application routes
+	s.Router.HandleFunc("/applications/{id}", middleware.SetMiddlewareJSON(s.CreateApplication)).Methods(POST)
 }

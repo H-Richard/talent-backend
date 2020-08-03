@@ -19,7 +19,7 @@ type User struct {
 	LastName  string    `gorm:"size:255;not null;" json:"lastName"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
-	Executive bool      `gorm:"default:true" json:"executive"`
+	Executive bool      `gorm:"default:false" json:"executive"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
