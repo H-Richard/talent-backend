@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"errors"
 	"html"
 	"strings"
@@ -31,7 +30,6 @@ func HashPassword(password string) ([]byte, error) {
 
 // VerifyPassword function for password verification
 func VerifyPassword(hashedPassword, password string) error {
-	fmt.Printf("comparing %s with %s", hashedPassword, password)
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
@@ -57,7 +55,7 @@ func (u *User) Post() error {
 
 // Helper validation function validates all user fields
 func (u *User) validateAll() error {
-	v:= truemail.Validator{}
+	v := truemail.Validator{}
 	if u.FirstName == "" {
 		return errors.New("FirstName musn't be empty")
 	}
@@ -67,7 +65,7 @@ func (u *User) validateAll() error {
 	if u.Email == "" {
 		return errors.New("Email musn't be empty")
 	}
-	if err := v.Validate(u.Email) ; err != nil {
+	if err := v.Validate(u.Email); err != nil {
 		return errors.New("Email format is Invalid")
 	}
 	return nil
@@ -75,7 +73,7 @@ func (u *User) validateAll() error {
 
 // Validate function for user validation
 func (u *User) Validate(action string) error {
-	v:= truemail.Validator{}
+	v := truemail.Validator{}
 	switch strings.ToLower(action) {
 	case "login":
 		if u.Password == "" {
@@ -84,7 +82,7 @@ func (u *User) Validate(action string) error {
 		if u.Email == "" {
 			return errors.New("Email musn't be empty")
 		}
-		if err := v.Validate(u.Email) ; err != nil {
+		if err := v.Validate(u.Email); err != nil {
 			return errors.New("Email format is Invalid")
 		}
 		return nil
@@ -150,12 +148,11 @@ func (u *User) All(db *gorm.DB) (*[]User, error) {
 
 // JSON function returns json representation if each user.
 func (u *User) JSON() map[string]interface{} {
-	return map[string]interface{} {
-		"email": u.Email,
+	return map[string]interface{}{
+		"email":     u.Email,
 		"firstName": u.FirstName,
-		"lastName": u.LastName,
+		"lastName":  u.LastName,
 		"executive": u.Executive,
 		"updatedAt": u.UpdatedAt,
 	}
 }
-

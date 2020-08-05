@@ -99,7 +99,7 @@ func (a *Application) AllByID(db *gorm.DB, ID uint32) (*[]Application, error) {
 
 // JSON gets json representation of each application
 func (a *Application) JSON() map[string]interface{} {
-	return map[string]interface{}{
+	json := map[string]interface{}{
 		"id":             a.ID,
 		"resumeURL":      a.ResumeURL,
 		"linkedInURL":    a.LinkedInURL,
@@ -108,8 +108,9 @@ func (a *Application) JSON() map[string]interface{} {
 		"otherURL":       a.OtherURL,
 		"additionalInfo": a.AdditionalInfo,
 		"applicant":      a.Applicant.JSON(),
-		"post":           a.Post.JSON(),
 		"status":         a.Status,
 		"appliedAt":      a.AppliedAt,
+		"postId":         a.PostID,
 	}
+	return json
 }

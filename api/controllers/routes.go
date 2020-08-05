@@ -28,4 +28,5 @@ func (s *Server) initializeRoutes() {
 
 	// Application routes
 	s.Router.HandleFunc("/applications/{id}", middleware.SetMiddlewareJSON(s.CreateApplication)).Methods(POST)
+	s.Router.HandleFunc("/applications", middleware.SetMiddlewareJSON(s.GetApplications)).Methods(GET)
 }

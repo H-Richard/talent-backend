@@ -8,14 +8,14 @@ import (
 )
 
 var users = []models.User{
-	models.User{
+	{
 		Email:     "executive@gmail.com",
 		Password:  "password",
 		FirstName: "Executive",
 		LastName:  "Doe",
 		Executive: true,
 	},
-	models.User{
+	{
 		Email:     "applicant@gmail.com",
 		Password:  "password",
 		FirstName: "Applicant",
@@ -24,17 +24,36 @@ var users = []models.User{
 }
 
 var posts = []models.Post{
-	models.Post{
+	{
 		Title:        "Software Developer",
 		Description:  "Write Software",
 		Requirements: []string{"Python", "TypeScript"},
 		Desirements:  []string{"Flask", "Ember"},
 	},
-	models.Post{
+	{
 		Title:        "VP of Marketing",
 		Description:  "Market Things",
 		Requirements: []string{"Instagram", "Facebook"},
 		Desirements:  []string{"Skills", "Youtube"},
+	},
+}
+
+var applications = []models.Application{
+	{
+		ResumeURL:      "google.ca",
+		LinkedInURL:    "google.ca",
+		GitHubURL:      "google.ca",
+		PortfolioURL:   "google.ca",
+		AdditionalInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+		OtherURL:       "youtube.com",
+	},
+	{
+		ResumeURL:      "google.ca",
+		LinkedInURL:    "google.ca",
+		GitHubURL:      "google.ca",
+		PortfolioURL:   "google.ca",
+		AdditionalInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+		OtherURL:       "youtube.com",
 	},
 }
 
@@ -78,6 +97,14 @@ func Seed(db *gorm.DB) {
 	for i := range posts {
 		posts[i].AuthorID = users[0].ID
 		err := db.Model(&models.Post{}).Create(&posts[i]).Error
+		if err != nil {
+			log.Fatalf("cannot insert to table: %v", err)
+		}
+	}
+	for i := range applications {
+		applications[i].ApplicantID = users[1].ID
+		applications[i].PostID = posts[i].ID
+		err := db.Model(&models.Application{}).Create(&applications[i]).Error
 		if err != nil {
 			log.Fatalf("cannot insert to table: %v", err)
 		}
