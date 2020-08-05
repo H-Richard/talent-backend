@@ -12,17 +12,17 @@ import (
 
 // Post struct represents job posts
 type Post struct {
-	ID uint32 `gorm:"primary_key;auto_increment" json:"id"`
-	Title string `gorm:"size:255; not null" json:"title"`
-	Description string `gorm:"type:text; not null" json:"description"`
+	ID           uint32         `gorm:"primary_key;auto_increment" json:"id"`
+	Title        string         `gorm:"size:255; not null" json:"title"`
+	Description  string         `gorm:"type:text; not null" json:"description"`
 	Requirements pq.StringArray `gorm:"type:text[]" json:"requirements"`
-	Desirements pq.StringArray `gorm:"type:text[]" json:"desirements"`
-	Active string `gorm:"default:true" json:"active"`
-	Author User `json:"author"`
-	AuthorID uint32 `gorm:"not null"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	ExpiresAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"expires_at"`
+	Desirements  pq.StringArray `gorm:"type:text[]" json:"desirements"`
+	Active       bool           `gorm:"default:true" json:"active"`
+	Author       User           `json:"author"`
+	AuthorID     uint32         `gorm:"not null" json:"author_id"`
+	CreatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ExpiresAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"expires_at"`
 }
 
 // Pre function to prepare post struct
@@ -31,8 +31,6 @@ func (p *Post) Pre() {
 	p.Title = html.EscapeString(strings.TrimSpace(p.Title))
 	p.Description = html.EscapeString(strings.TrimSpace(p.Description))
 	p.Author = User{}
-	p.Desirements = []string{}
-	p.Requirements = []string{}
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
 	p.ExpiresAt = time.Now()
@@ -46,7 +44,10 @@ func (p *Post) Validate() error {
 	if p.Description == "" {
 		return errors.New("Description musn't be empty")
 	}
-	return nil;
+	if len(p.Requirements) <= 0 || len(p.Desirements) <= 0 {
+		return errors.New("Desirements and/or Requirements musn't be empty")
+	}
+	return nil
 }
 
 // SavePost for saving posts to the database
@@ -103,12 +104,12 @@ func (p *Post) UpdatePost(db *gorm.DB) (*Post, error) {
 	var err error
 	err = db.Debug().Model(&Post{}).Where("id = ?", p.ID).Updates(
 		Post{
-			Title: p.Title,
-			Description: p.Description,
-			Desirements: p.Desirements,
+			Title:        p.Title,
+			Description:  p.Description,
+			Desirements:  p.Desirements,
 			Requirements: p.Requirements,
-			UpdatedAt: time.Now(),
-			ExpiresAt: p.ExpiresAt,
+			UpdatedAt:    time.Now(),
+			ExpiresAt:    p.ExpiresAt,
 		},
 	).Error
 	if err != nil {
@@ -136,17 +137,20 @@ func (p *Post) DeletePost(db *gorm.DB, pid, uid uint32) (int64, error) {
 }
 
 // JSON gets json representation of each post
-func (p *Post) JSON () map[string]interface{} {
-	return map[string]interface{}{
-		"id": p.ID,
-		"title": p.Title,
-		"description": p.Description,
+func (p *Post) JSON() map[string]interface{} {
+	json := map[string]interface{}{
+		"id":           p.ID,
+		"title":        p.Title,
+		"description":  p.Description,
 		"requirements": p.Requirements,
-		"desirements": p.Desirements,
-		"active": p.Active,
-		"createdAt": p.CreatedAt,
-		"updatedAt": p.UpdatedAt,
-		"expiresAt": p.ExpiresAt,
-		"author": p.Author.JSON(),
+		"desirements":  p.Desirements,
+		"active":       p.Active,
+		"createdAt":    p.CreatedAt,
+		"updatedAt":    p.UpdatedAt,
+		"expiresAt":    p.ExpiresAt,
 	}
+	if p.Author.Email != "" {
+		json["author"] = p.Author.JSON()
+	}
+	return json
 }
