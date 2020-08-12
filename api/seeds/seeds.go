@@ -16,9 +16,15 @@ var users = []models.User{
 		Executive: true,
 	},
 	{
-		Email:     "applicant@gmail.com",
+		Email:     "applicant1@gmail.com",
 		Password:  "password",
-		FirstName: "Applicant",
+		FirstName: "Applicant1",
+		LastName:  "Doe",
+	},
+	{
+		Email:     "applicant2@gmail.com",
+		Password:  "password",
+		FirstName: "Applicant2",
 		LastName:  "Doe",
 	},
 }
@@ -102,7 +108,7 @@ func Seed(db *gorm.DB) {
 		}
 	}
 	for i := range applications {
-		applications[i].ApplicantID = users[1].ID
+		applications[i].ApplicantID = users[1+i].ID
 		applications[i].PostID = posts[i].ID
 		err := db.Model(&models.Application{}).Create(&applications[i]).Error
 		if err != nil {
